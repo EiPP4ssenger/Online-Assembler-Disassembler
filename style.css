@@ -1,0 +1,34 @@
+
+body {
+    font-family: 'Open Sans', sans-serif;
+}
+
+.form-group {
+    padding-top: 10px;
+    padding-right:10px;
+}
+
+.container {
+    padding-top: 20px;
+    padding-bottom: 60px;
+}
+
+#asm_editor, #disasm_editor {
+    margin-top: 15px;
+    height: 340px;
+    position: relative;
+    border: 1px solid lightgray;
+}
+
+#asm_btn, #disasm_btn {
+    margin-top: 20px;
+    margin-bottom: 40px;
+}
+
+#asm_output, #disasm_output {
+    font-family: Inconsolata;
+}
+
+#asm_output .row, #disasm_output .row {
+    margin-bottom: 10px;
+}

@@ -1,0 +1,308 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <title>Online Assembler & Dissassembler</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css">
+    <link rel="stylesheet"
+        href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-select/1.13.2/css/bootstrap-select.min.css">
+    <link href='//fonts.googleapis.com/css?family=Open+Sans:400italic,600italic,400,600' rel='stylesheet'
+        type='text/css'>
+    <link href='//fonts.googleapis.com/css?family=Inconsolata:400,700' rel='stylesheet' type='text/css'>
+    <link rel="stylesheet"
+        href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.13.1/styles/qtcreator_light.min.css">
+
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/ace/1.4.2/ace.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.13.1/highlight.min.js"></script>
+
+
+    <link rel="stylesheet" href="style.css">
+
+</head>
+
+<body>
+
+    <nav class="navbar navbar-light bg-light">
+        <span class="navbar-brand mb-0 h1">Online Assembler & Dissassembler</span>
+    </nav>
+
+    <div class="container mx-auto">
+        <div class="row">
+            <h3>Assemble</h3>
+        </div>
+        <div class="row">
+            <form class="form-inline">
+                <div class="form-group">
+                    <div class="input-group">
+                        <label class="input-group-text">Arch</label>
+                        <select class="form-control" id='asm_arch' onchange='asm_arch_fill(this)' data-width="130px">
+                            <option value="1">ARM</option>
+                            <option value="2">ARM64</option>
+                            <option value="3">MIPS</option>
+                            <option value="4">x86</option>
+                            <option value="5">PowerPC</option>
+                            <option value="6">SPARC</option>
+                            <option value="7">SystemZ</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <div class="input-group">
+                        <label class="input-group-text">Endian</label>
+                        <select class="form-control" id='asm_endianness' data-width="130px">
+                            <option value="0">Little-Endian</option>
+                            <option value="1073741824">Big-Endian</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <div class="input-group">
+                        <label class="input-group-text">Mode</label>
+                        <select class="form-control" id='asm_mode' data-width="130px">
+                            <option value="0">None</option>
+                            <option value="2">16-bit</option>
+                            <option value="4">32-bit</option>
+                            <option value="8">64-bit</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <div class="input-group">
+                        <label class="input-group-text">Offset</label>
+                        <input type="text" class="form-control" id='asm_offset' placeholder="(hexadecimal)">
+                    </div>
+                </div>
+            </form>
+        </div>
+        <div class="row">
+            <div id="asm_editor" class="w-100"></div>
+        </div>
+        <div class="row">
+            <div class="mx-auto">
+                <button type="button" class="btn btn-primary btn-lg " id='asm_btn'
+                    onclick='asm_onClick()'>Assemble</button>
+            </div>
+        </div>
+        <div class="row">
+            <div class="alert alert-danger mx-auto" id="asm_err" role="alert" hidden></div>
+        </div>
+        <div id="asm_output" hidden>
+            <div class="row ">
+                <div class="card mx-auto col-md-10 border-secondary">
+                    <div class="card-body">
+                        <p class="card-title"><b>Raw Hex</b> (zero bytes in bold):</p>
+                        <p class="card-text" id="asm_raw_hex"></p>
+                    </div>
+                </div>
+            </div>
+            <div class="row">
+                <div class="card mx-auto col-md-10 border-secondary">
+                    <div class="card-body">
+                        <p class="card-title"><b>String Literal:</b></p>
+                        <p class="card-text" id="asm_string_literal"></p>
+                    </div>
+                </div>
+            </div>
+            <div class="row">
+                <div class="card mx-auto col-md-10 border-secondary">
+                    <div class="card-body">
+                        <p class="card-title"><b>Array Literal:</b></p>
+                        <p class="card-text" id="asm_array_literal"></p>
+                    </div>
+                </div>
+            </div>
+            <div class="row">
+                <div class="card mx-auto col-md-10 border-secondary">
+                    <div class="card-body">
+                        <p class="card-title"><b>Disassembly:</b></p>
+                        <pre class="card-text" id="asm_disassembly"></pre>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    <div class="container mx-auto">
+        <div class="row">
+            <h3>Disassembler</h3>
+        </div>
+        <div class="row">
+            <form class="form-inline">
+                <div class="form-group">
+                    <div class="input-group">
+                        <label class="input-group-text">Arch</label>
+                        <select class="form-control" id='disasm_arch' onchange='disasm_arch_fill(this)'
+                            data-width="130px">
+                            <option value="0">ARM</option>
+                            <option value="1">ARM64</option>
+                            <option value="2">MIPS</option>
+                            <option value="3">x86</option>
+                            <option value="4">PowerPC</option>
+                            <option value="5">SPARC</option>
+                            <option value="6">SystemZ</option>
+                            <option value="7">XCore</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <div class="input-group">
+                        <label class="input-group-text">Endian</label>
+                        <select class="form-control" id='disasm_endianness' data-width="130px">
+                            <option value="0">Little-Endian</option>
+                            <option value="-2147483648">Big-Endian</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <div class="input-group">
+                        <label class="input-group-text">Mode</label>
+                        <select class="form-control" id='disasm_mode' data-width="130px">
+                            <option value="2">16-bit</option>
+                            <option value="4">32-bit</option>
+                            <option value="8">64-bit</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <div class="input-group">
+                        <label class="input-group-text">Offset</label>
+                        <input type="text" class="form-control" id='disasm_offset' placeholder="(hexadecimal)">
+                    </div>
+                </div>
+            </form>
+        </div>
+        <div class="row">
+            <div id="disasm_editor" class="w-100"></div>
+        </div>
+        <div class="row">
+            <div class="mx-auto">
+                <button type="button" class="btn btn-primary btn-lg " id='disasm_btn'
+                    onclick='disasm_onClick()'>Disassemble</button>
+            </div>
+        </div>
+        <div class="row">
+            <div class="alert alert-danger mx-auto" id="disasm_err" role="alert" hidden></div>
+        </div>
+        <div id="disasm_output" hidden>
+            <div class="row ">
+                <div class="card mx-auto col-md-10 border-secondary">
+                    <div class="card-body">
+                        <p class="card-title"><b>Raw Hex</b> (zero bytes in bold):</p>
+                        <p class="card-text" id="disasm_raw_hex"></p>
+                    </div>
+                </div>
+            </div>
+            <div class="row">
+                <div class="card mx-auto col-md-10 border-secondary">
+                    <div class="card-body">
+                        <p class="card-title"><b>String Literal:</b></p>
+                        <p class="card-text" id="disasm_string_literal"></p>
+                    </div>
+                </div>
+            </div>
+            <div class="row">
+                <div class="card mx-auto col-md-10 border-secondary">
+                    <div class="card-body">
+                        <p class="card-title"><b>Array Literal:</b></p>
+                        <p class="card-text" id="disasm_array_literal"></p>
+                    </div>
+                </div>
+            </div>
+            <div class="row">
+                <div class="card mx-auto col-md-10 border-secondary">
+                    <div class="card-body">
+                        <p class="card-title"><b>Disassembly:</b></p>
+                        <pre class="card-text" id="disasm_disassembly"></pre>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        var asm_editor = null;
+        var disasm_editor = null;
+    </script>
+
+    <!-- assembler/disassembler library -->
+    <script type='text/javascript' src="scripts/libs/keystone.min.js"></script>
+    <script type='text/javascript' src="scripts/libs/capstone.min.js"></script>
+
+    <!-- script to handle assembling/disassembling -->
+    <script type='text/javascript' src="scripts/utils.js"></script>
+    <script type='text/javascript' src="scripts/assembler.js"></script>
+    <script type='text/javascript' src="scripts/disassembler.js"></script>
+
+    <script type='text/javascript'>
+
+        $(document).ready(function () {
+
+            /**
+             * Setup Default View for Assembler
+             */
+
+            asm_editor = ace.edit("asm_editor");
+            asm_editor.getSession().setMode("ace/mode/assembly_x86");
+            asm_editor.setTheme("ace/theme/dawn");
+            asm_editor.setOption("showPrintMargin", false);
+            asm_editor.setOption("showInvisibles", false);
+            asm_editor.setOption("fontFamily", 'Inconsolata');
+            asm_editor.setOption("fontSize", 20);
+
+            // set default asm code
+            var code = "gcd:\
+            \r\tmov eax, esi\
+            \r.L3:\
+            \r\ttest edi, edi\
+            \r\tje .L4\
+            \r\tcdq\
+            \r\tidiv edi\
+            \r\tmov eax, edi\
+            \r\tmov edi, edx\
+            \r\tjmp .L3\
+            \r.L4:\
+            \r\tret";
+
+            asm_editor.setValue(code);
+
+            $('#asm_arch').val(ks.ARCH_X86).change();
+            $('#asm_endianness').val(ks.MODE_LITTLE_ENDIAN).change();
+            $('#asm_mode').val(ks.MODE_64).change();
+            $('#asm_offset').val('0x10000');
+
+            /**
+             * Setup Default View for Disassembler
+             */
+
+            disasm_editor = ace.edit("disasm_editor");
+            disasm_editor.getSession().setMode("ace/mode/assembly_x86");
+            disasm_editor.setTheme("ace/theme/dawn");
+            disasm_editor.setOption("showPrintMargin", false);
+            disasm_editor.setOption("showInvisibles", false);
+            disasm_editor.setOption("fontFamily", 'Inconsolata');
+            disasm_editor.setOption("fontSize", 20);
+
+            // set default opcodes (gcd's algo)
+            disasm_editor.setValue("0x89 0xF0 0x85 0xFF 0x74 0x09 0x99 0xF7 0xFF 0x89 0xF8 0x89 0xD7 0xEB 0xF3 0xC3");
+
+            $('#disasm_arch').val(cs.ARCH_X86).change();
+            $('#disasm_endianness').val(cs.MODE_LITTLE_ENDIAN).change();
+            $('#disasm_mode').val(cs.MODE_64).change();
+            $('#disasm_offset').val('0x10000');
+
+        });
+    </script>
+
+
+</body>
+
+</html>
