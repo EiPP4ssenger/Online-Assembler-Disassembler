@@ -1,4 +1,4 @@
-# Online Assembler & Dissassembler
+# Online Assembler & Disassembler
 Online assembler/disassembler based on [Keystone.js](https://alexaltea.github.io/keystone.js/) and [Capstone.js](https://alexaltea.github.io/capstone.js/)
 
 # Why?
