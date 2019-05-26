@@ -170,7 +170,7 @@ function disasm_onClick() {
 
         var op_str = instr.op_str;
 
-        if ('detail' in instr) {
+        if ('detail' in instr && 'groups' in instr.detail) {
             // find branch
             if (instr.detail.groups.includes(cs.GRP_JUMP)
                 || instr.detail.groups.includes(cs.GRP_CALL)
