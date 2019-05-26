@@ -40,6 +40,8 @@ function disassembly(html_id, opcodes, asm_value, arch, endian, mode, offset) {
 
     // disassemble (to get opcodes' length)
     var d = new cs.Capstone(arch, endian | mode);
+    d.option(cs.OPT_DETAIL, cs.OPT_ON);
+    d.option(cs.OPT_SKIPDATA, cs.OPT_ON);
     var instructions = d.disasm(opcodes, offset);
     d.close();
 

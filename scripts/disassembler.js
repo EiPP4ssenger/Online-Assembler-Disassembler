@@ -148,6 +148,7 @@ function disasm_onClick() {
     try{
         var cstone = new cs.Capstone(arch, endian | mode);
         cstone.option(cs.OPT_DETAIL, cs.OPT_ON);
+        cstone.option(cs.OPT_SKIPDATA, cs.OPT_ON);
         instructions = cstone.disasm(opcodes, offset);
         cstone.close();
     } catch (err) {
@@ -169,12 +170,14 @@ function disasm_onClick() {
 
         var op_str = instr.op_str;
 
-        // find branch
-        if (instr.detail.groups.includes(cs.GRP_JUMP) || instr.detail.groups.includes(cs.GRP_CALL)) {
-            var addr_match = op_str.match(/[^,]*0x[a-fA-F0-9]+/)[0];
-            addr_match = addr_match.replace(/[^,]*0x/, '');
-            labels.add(parseInt(addr_match, 16));
-            op_str = 'loc_' + addr_match
+        if (instr.detail.length > 0) {
+            // find branch
+            if (instr.detail.groups.includes(cs.GRP_JUMP) || instr.detail.groups.includes(cs.GRP_CALL)) {
+                var addr_match = op_str.match(/[^,]*0x[a-fA-F0-9]+/)[0];
+                addr_match = addr_match.replace(/[^,]*0x/, '');
+                labels.add(parseInt(addr_match, 16));
+                op_str = 'loc_' + addr_match
+            }
         }
 
         disasm_arr.push([instr.address, instr.mnemonic + "\t" + op_str]);
