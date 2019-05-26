@@ -175,10 +175,12 @@ function disasm_onClick() {
             if (instr.detail.groups.includes(cs.GRP_JUMP)
                 || instr.detail.groups.includes(cs.GRP_CALL)
                 || instr.detail.groups.includes(cs.X86_GRP_BRANCH_RELATIVE)) {
-                var addr_match = op_str.match(/[^,]*0x[a-fA-F0-9]+/)[0];
-                addr_match = addr_match.replace(/[^,]*0x/, '');
-                labels.add(parseInt(addr_match, 16));
-                op_str = 'loc_' + addr_match
+                var addr_match = op_str.match(/[^,]*0x[a-fA-F0-9]+/);
+                if (addr_match) {
+                    addr_match = addr_match[0].replace(/[^,]*0x/, '');
+                    labels.add(parseInt(addr_match, 16));
+                    op_str = 'loc_' + addr_match;
+                }
             }
         }
 
