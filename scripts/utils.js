@@ -60,9 +60,11 @@ function disassembly(html_id, opcodes, asm_value, arch, endian, mode, offset) {
     var i = 0;
     asm_split.forEach(function (code) {
 
+        code = code.trim()
+
         var txt = '';
 
-        if (code.match(/^.+:/)) {
+        if (code.match(/^.+:$/)) {
             // if label
             label_only = code.replace(/(^.+:)\s+#.*/, "$1");   // extract label only
             txt += " ".repeat(address_spaces + opcodes_spaces+21 - label_only.length);
