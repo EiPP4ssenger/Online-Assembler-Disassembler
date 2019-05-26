@@ -170,9 +170,11 @@ function disasm_onClick() {
 
         var op_str = instr.op_str;
 
-        if (instr.detail.length > 0) {
+        if ('detail' in instr) {
             // find branch
-            if (instr.detail.groups.includes(cs.GRP_JUMP) || instr.detail.groups.includes(cs.GRP_CALL)) {
+            if (instr.detail.groups.includes(cs.GRP_JUMP)
+                || instr.detail.groups.includes(cs.GRP_CALL)
+                || instr.detail.groups.includes(cs.X86_GRP_BRANCH_RELATIVE)) {
                 var addr_match = op_str.match(/[^,]*0x[a-fA-F0-9]+/)[0];
                 addr_match = addr_match.replace(/[^,]*0x/, '');
                 labels.add(parseInt(addr_match, 16));
